@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
         paddingHorizontal: 16,
         elevation: 2,
-        marginTop: 12
+        marginTop: 12,
     },
     text: {
         color: 'white',

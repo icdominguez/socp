@@ -1,62 +1,62 @@
 import axios from "axios";
 import { useContext, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import LoadingOverlay from "../components/LoadingOverlay";
 import CustomButton from "../components/ui/CustomButton";
 import Icon from "../components/ui/Icon";
 import { AuthContext } from "../store/auth-context";
+import { login } from "../util/http";
 
 function LoginScreen({ navigation }) {
 
     const [username, onChangeUsername] = useState("");
     const [password, onChangePassword] = useState("");
 
+    const [isLoading, setIsLoading] = useState();
+
+    const [passwordVisible, setPasswordVisible] = useState(true);
+
     const authContext = useContext(AuthContext);
 
-    function PressHandler() {
-        console.log(`Username: ${username} and password: ${password}`);
+    const PressHandler = () => {
 
-        axios.post('https://icdominguez-soccer-pools.herokuapp.com/api/auth/login', {
+        const bodyParameters = {
             username: username,
             password: password
-        }).then((response) => {
-            if(response.status === 200) {
-                navigation.navigate('Home');
-                authContext.authenticate(response.data.token);
-            }
+        }
 
-        }, (error) => {
-            console.log(error);
-        });
+        axios.post("https://icdominguez-soccer-pools.herokuapp.com/api/auth/login", bodyParameters)
+            .then((response) => {
+                if(response.status === 200)
+                authContext.authenticate(response.data.token);
+            });
     }
-    
+
     function navigateToSignUp() {
         navigation.navigate("SignUp");
     }
 
+    if(isLoading) {
+        return <LoadingOverlay/>
+    }
+
     return (
         <View style={styles.container}>
-            <Text style={styles.loginText}>Login into your account</Text>
-            
+
             <View style={styles.form}>
-                <TextInput style={styles.textInput} placeholder="Username" onChangeText={onChangeUsername} value={username}></TextInput>
-                <TextInput style={styles.textInput} placeholder="Password" onChangeText={onChangePassword} value={password}></TextInput>
+                <TextInput style={styles.textInput} placeholder="Username" onChangeText={onChangeUsername} value={username} autoCapitalize='none'></TextInput>
+
+                <View>
+                    <TextInput style={styles.textInput} 
+                        placeholder="Password" 
+                        onChangeText={onChangePassword} 
+                        value={password} 
+                        autoCapitalize='none' 
+                        secureTextEntry={true} />
+                       
+                </View>
 
                 <CustomButton onPress={PressHandler}>Login</CustomButton>
-            </View>
-
-            <Text style={styles.signInText}>- Or sign in with -</Text>
-
-            <View style={styles.iconContainer}>
-                <Icon resource={require('./../assets/icons/ic_apple.png')} />
-                <Icon resource={require('./../assets/icons/ic_facebook.png')} />
-                <Icon resource={require('./../assets/icons/ic_google.png')} />
-            </View>
-
-            <View style={styles.signUpContainer}>
-                <Text>Don't have an account? </Text>
-                <Pressable onPress={navigateToSignUp}>
-                    <Text style={styles.signUpText}>Sign up</Text>
-                </Pressable>
             </View>
         </View>
     )
@@ -64,7 +64,10 @@ function LoginScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        alignContent: "center",
+        justifyContent: "center",
+        width: '100%'
     },
     textInput: {
         height: 50,
@@ -97,13 +100,9 @@ const styles = StyleSheet.create({
     loginButton: {
         marginTop: 200
     },
-    loginText: {
-        marginTop: 40,
-        marginStart: 12
-    },
     signInText: {
         marginTop: 50,
-        marginBottom: 20,    
+        marginBottom: 20,
         textAlign: "center"
     }
 });
